@@ -2,6 +2,7 @@ const express = require("express"),
       bodyParser = require("body-parser"),
       http = require("http"),
       morgan = require("morgan"),
+      dishRouter = require("./routes/dishRouter"),
       hostname = "localhost",
       port = 3001;
 
@@ -18,7 +19,7 @@ app.use(express.static(__dirname + '/public'));
 
 }); */
 
-app.all('/dishes', (req, res, next) => {
+/* app.all('/dishes', (req, res, next) => {
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/plain');
     next();
@@ -57,7 +58,9 @@ app.put('/dishes/:dishId', (req, res, next) => {
 
 app.delete('/dishes/:dishId', (req, res, next) => {
     res.end('Deleting dish: ' + req.params.dishId);
-});
+}); */
+
+app.use("/dishes", dishRouter);
 
 
 
