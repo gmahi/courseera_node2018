@@ -3,7 +3,41 @@ const assert = require('assert');
 const dboper = require("./operations");
 const url = 'mongodb://localhost:27017/conFusion';
 const dbname = 'conFusion';
-MongoClient.connect(url,{ useNewUrlParser: true }, (err, client) => {
+
+MongoClient.connect(url).then((client) => {
+    console.log("Connected correctly to the Server");
+    const db = client.db(dbname);
+    dboper.insertDocument(db, { name: "Vadonut", description: "Test" }, "dishes")
+        .then((result) => {
+            console.log("Insert Document\n", result.ops);
+            return dboper.findDocuments(db, "dishes");
+        })
+        .then((docs) => {
+            console.log("Found Documents:\n", docs);
+            return dboper.updateDocument(db, { name: "Vadonut" }, { description: "Update test" }, "dishes");
+        })
+        .then((result) => {
+            console.log("Update documents\n", result.result);
+            return dboper.findDocuments(db, "dishes");
+        })
+        .then((docs) => {
+            console.log("Found updated documents\n", docs);
+            return db.dropCollection("dishes");
+        })
+        .then((result) => {
+            console.log("Dropped collection", result)
+            client.close();
+        })
+        .catch((err) => console.log(err));
+
+
+
+})
+    .catch((err) => console.log(err));
+
+
+
+/* MongoClient.connect(url,{ useNewUrlParser: true }, (err, client) => {
     assert.equal(err, null);
     console.log("Connected correctly to the Server");
     const db = client.db(dbname);
@@ -26,34 +60,5 @@ MongoClient.connect(url,{ useNewUrlParser: true }, (err, client) => {
 
         })
     } )
-
-
-
-
-    
-     /*    collection = db.collection("dishes");
-
-    collection.insertOne({ "name": "Upma", "description": "made of wheat grail" },
-        (err, result) => {
-            assert.equal(err, null);
-            console.log("After Insert:\n");
-            console.log(result.ops);
-            collection.find({}).toArray((err, docs) => {
-                assert.equal(err,null);
-                
-                console.log("Found:\n");
-                console.log(docs);
-    
-                db.dropCollection("dishes", (err, result) => {
-                    assert.equal(err,null);
-    
-                    client.close();
-                });
-            });
-
-
-
-        }
-    ) */
 }
-);
+); */
