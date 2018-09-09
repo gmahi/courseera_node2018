@@ -33,33 +33,30 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-function auth(req, res, next) {
+function auth (req, res, next) {
   console.log(req.headers);
   var authHeader = req.headers.authorization;
   if (!authHeader) {
-    var err = new Error("You are not authenicated!");
-    res.setHeader("WWWW-Authenicate", "Basic");
-    err.status = 401;
-    next(err);
-    return
+      var err = new Error('You are not authenticated!');
+      res.setHeader('WWW-Authenticate', 'Basic');
+      err.status = 401;
+      next(err);
+      return;
   }
 
-  var auth = new Buffer(authHeader.split('')[1], 'base64').toString().split();
-
+  var auth = new Buffer(authHeader.split(' ')[1], 'base64').toString().split(':');
   var user = auth[0];
   var pass = auth[1];
-  if (user == 'admin' && pass == "password") {
-    next(); // authorized
+  if (user == 'admin' && pass == 'password') {
+      next(); // authorized
+  } else {
+      var err = new Error('You are not authenticated!');
+      res.setHeader('WWW-Authenticate', 'Basic');      
+      err.status = 401;
+      next(err);
   }
-  else {
-    var err = new Error('You are not authenticated!');
-    res.setHeader('WWW-Authenticate', 'Basic');
-    err.status = 401;
-    next(err)
-
-  }
-
 }
+
 
 app.use(auth);
 
