@@ -11,16 +11,15 @@ var dishRouter = require('./routes/dishRouter');
 var promoRouter = require('./routes/promoRouter');
 var leaderRouter = require('./routes/leaderRouter');
 const mongoose = require("mongoose"),
+      session = require("express-session"),
+      FileStore = require("session-file-store")(session),
   Dishes = require("./models/dishes"),
   url = 'mongodb://localhost:27017/conFusion',
-  connect = mongoose.connect(url);
+  connect = mongoose.connect(url) ;
 
 connect.then((db) => {
   console.log("Connected correctly to the server");
 }, (err) => { console.log(err) })
-
-
-
 
 var app = express();
 
@@ -32,10 +31,18 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser('12345-67890-09876-54321'));
+app.use(session({
+  name:"session-id",
+  secret:"12345-67890-09876-54321",
+  saveUninitialized:false,
+  resave:false,
+  store: new FileStore()
+}))
 
 
 function auth (req, res, next) {
-if(!req.signedCookies.user){
+  console.log(req.session);
+if(!req.session.user){
 
   var authHeader = req.headers.authorization;
   if (!authHeader) {
@@ -50,7 +57,8 @@ if(!req.signedCookies.user){
   var user = auth[0];
   var pass = auth[1];
   if (user == 'admin' && pass == 'password') {
-    res.cookie('user', 'admin', {signed:true});
+    req.session.user = 'admin';
+    //res.cookie('user', 'admin', {signed:true});
 
       next(); // authorized
   } else {
@@ -63,7 +71,8 @@ if(!req.signedCookies.user){
 }
 else{
 
-  if(req.signedCookies.user === 'admin'){
+  if(req.session.user === 'admin'){
+    console.log("req.session", req.session)
     next();
   }
   else{
